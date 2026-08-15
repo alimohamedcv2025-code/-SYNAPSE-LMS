@@ -1,0 +1,273 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  :root {
+    --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Neo-Brutalist & Bento Utilities */
+.neo-box {
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  transition: all 0.15s ease-in-out;
+}
+.dark .neo-box {
+  background-color: #181920;
+  border: 2px solid #323544;
+  box-shadow: 4px 4px 0px #07080b;
+  color: #f1f3f9;
+}
+
+.neo-box-dark {
+  background-color: #1a1a1e;
+  border: 2px solid #383842;
+  box-shadow: 4px 4px 0px #000000;
+}
+.dark .neo-box-dark {
+  background-color: #121318;
+  border-color: #2b2c36;
+  box-shadow: 4px 4px 0px #07080b;
+}
+
+.neo-box-yellow {
+  background-color: #FFE600;
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  color: #000000;
+}
+.dark .neo-box-yellow {
+  background-color: #FFE600;
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  color: #000000;
+}
+
+.neo-box-interactive {
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  box-shadow: 4px 4px 0px #000000;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.neo-box-interactive:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #000000;
+}
+.neo-box-interactive:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000000;
+}
+
+.dark .neo-box-interactive {
+  background-color: #181920;
+  border: 2px solid #323544;
+  box-shadow: 4px 4px 0px #07080b;
+  color: #f1f3f9;
+}
+.dark .neo-box-interactive:hover {
+  background-color: #21232d;
+  border-color: #4a4e63;
+  box-shadow: 6px 6px 0px #07080b;
+}
+.dark .neo-box-interactive:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #07080b;
+}
+
+.neo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px #000000;
+  transition: all 0.12s ease;
+  white-space: nowrap;
+  user-select: none;
+}
+.neo-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #000000;
+}
+.neo-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #000000;
+}
+
+.neo-btn-primary {
+  background-color: #FFE600;
+  color: #000000;
+  border-color: #000000;
+}
+.neo-btn-primary:hover {
+  background-color: #FFF04D;
+}
+.dark .neo-btn-primary {
+  background-color: #FFE600;
+  color: #000000;
+  border-color: #000000;
+  box-shadow: 3px 3px 0px #000000;
+}
+
+.neo-btn-dark {
+  background-color: #000000;
+  color: #ffffff;
+}
+.neo-btn-dark:hover {
+  background-color: #1f1f1f;
+}
+.dark .neo-btn-dark {
+  background-color: #FFE600;
+  color: #000000;
+  border-color: #000000;
+}
+.dark .neo-btn-dark:hover {
+  background-color: #FFF04D;
+}
+
+.neo-btn-white {
+  background-color: #ffffff;
+  color: #000000;
+  border-color: #000000;
+}
+.neo-btn-white:hover {
+  background-color: #f3f4f6;
+}
+.dark .neo-btn-white {
+  background-color: #21232d;
+  color: #f3f4f6;
+  border-color: #3b3f52;
+  box-shadow: 3px 3px 0px #07080b;
+}
+.dark .neo-btn-white:hover {
+  background-color: #2a2d3b;
+  color: #ffffff;
+  border-color: #555972;
+}
+
+.neo-btn-danger {
+  background-color: #FF4747;
+  color: #ffffff;
+}
+.neo-btn-danger:hover {
+  background-color: #ff5e5e;
+}
+.dark .neo-btn-danger {
+  background-color: #e03838;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+.neo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: 1.5px solid #000000;
+  box-shadow: 2px 2px 0px #000000;
+}
+.dark .neo-badge {
+  border-color: #383a48;
+  box-shadow: 2px 2px 0px #07080b;
+}
+
+.neo-input {
+  width: 100%;
+  border: 2px solid #000000;
+  background-color: #ffffff;
+  color: #111827;
+  padding: 0.625rem 0.875rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.15s ease;
+  box-shadow: 2px 2px 0px #000000;
+}
+.neo-input:focus {
+  background-color: #ffffff;
+  color: #111827;
+  box-shadow: 4px 4px 0px #000000;
+  border-color: #000000;
+}
+
+.dark .neo-input {
+  background-color: #181920;
+  color: #f1f3f9;
+  border-color: #3b3f52;
+  box-shadow: 2px 2px 0px #07080b;
+}
+.dark .neo-input:focus {
+  background-color: #21232d;
+  color: #ffffff;
+  border-color: #FFE600;
+  box-shadow: 4px 4px 0px #000000;
+}
+
+input, textarea, select {
+  color: #111827;
+}
+.dark input, .dark textarea, .dark select {
+  color: #f3f4f6;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #71717a;
+}
+.dark input::placeholder, .dark textarea::placeholder {
+  color: #9ca3af;
+}
+
+select option {
+  background-color: #ffffff;
+  color: #111827;
+}
+.dark select option {
+  background-color: #181920;
+  color: #f3f4f6;
+}
+
+/* Base dark mode typography contrast */
+.dark body {
+  color: #d1d5db;
+}
+.dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6, .dark .font-display {
+  color: #f9fafb;
+}
+
+.bg-dot-pattern {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.12) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+.dark .bg-dot-pattern {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.2px, transparent 1.2px);
+  background-size: 18px 18px;
+}
+
+.bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
+.dark .bg-grid-pattern {
+  background-size: 32px 32px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+

@@ -1,0 +1,6 @@
+{
+  "name": "College Learning Platform",
+  "description": "A modern Neo-Brutalist English-only college learning platform featuring link-based course materials, role-based access for students and scoped admins, and strict academic selection rules.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
