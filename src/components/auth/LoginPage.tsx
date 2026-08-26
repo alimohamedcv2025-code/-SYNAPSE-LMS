@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Lock, Mail, ArrowRight, ShieldCheck, UserCheck, Sparkles } from 'lucide-react';
+import { Lock, Mail, ArrowRight } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { login, navigate, switchUser, users } = useApp();
-  const [email, setEmail] = useState('ahmed.mansoor@college.edu');
-  const [password, setPassword] = useState('password123');
+  const { login, navigate } = useApp();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(email);
+    setIsSubmitting(true);
+    await login(email, password);
+    setIsSubmitting(false);
   };
 
   return (
@@ -28,44 +31,6 @@ export const LoginPage: React.FC = () => {
           <p className="text-xs font-mono text-neutral-600 dark:text-neutral-400">
             Sign in to access your scoped subjects and link materials.
           </p>
-        </div>
-
-        {/* Demo Fast Logins */}
-        <div className="mb-6 p-3 bg-amber-50 dark:bg-amber-950/40 border border-black dark:border-amber-700 space-y-2">
-          <div className="flex items-center gap-1 text-[11px] font-mono font-bold text-neutral-800 dark:text-amber-300">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Instant Demo Accounts:</span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5 font-mono text-[10px]">
-            <button
-              type="button"
-              onClick={() => { switchUser('usr_student_1'); }}
-              className="p-1.5 bg-white dark:bg-neutral-800 border border-black text-left hover:bg-[#FFE600] dark:hover:bg-[#FFE600] dark:hover:text-black font-bold truncate"
-            >
-              🎓 Student (L3 CS)
-            </button>
-            <button
-              type="button"
-              onClick={() => { switchUser('usr_student_2'); }}
-              className="p-1.5 bg-white dark:bg-neutral-800 border border-black text-left hover:bg-[#FFE600] dark:hover:bg-[#FFE600] dark:hover:text-black font-bold truncate"
-            >
-              ☀️ Student (Summer)
-            </button>
-            <button
-              type="button"
-              onClick={() => { switchUser('usr_admin_l3'); }}
-              className="p-1.5 bg-white dark:bg-neutral-800 border border-black text-left hover:bg-blue-300 dark:hover:bg-blue-400 dark:hover:text-black font-bold truncate"
-            >
-              🛡️ Admin (Level 3)
-            </button>
-            <button
-              type="button"
-              onClick={() => { switchUser('usr_super_admin'); }}
-              className="p-1.5 bg-white dark:bg-neutral-800 border border-black text-left hover:bg-purple-300 dark:hover:bg-purple-400 dark:hover:text-black font-bold truncate"
-            >
-              👑 Super Admin
-            </button>
-          </div>
         </div>
 
         {/* Form */}

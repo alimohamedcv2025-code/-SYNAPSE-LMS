@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
-  const { navigate, subjects, switchUser } = useApp();
+  const { navigate, subjects } = useApp();
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] dark:bg-[#121316] text-neutral-900 dark:text-white selection:bg-[#FFE600] selection:text-black">
@@ -67,39 +67,6 @@ export const LandingPage: React.FC = () => {
                 >
                   <span>Sign In</span>
                 </button>
-              </div>
-
-              {/* Persona Quick Launch Bar */}
-              <div className="pt-6 border-t-2 border-black/10 dark:border-neutral-800 space-y-2">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-500 block">
-                  ⚡ 1-Click Interactive Persona Launch:
-                </span>
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() => { switchUser('usr_student_1'); navigate('student-dashboard'); }}
-                    className="px-3 py-1.5 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 text-xs font-mono font-bold shadow-[2px_2px_0px_#000000] hover:bg-[#FFE600] dark:hover:bg-[#FFE600] dark:hover:text-black transition-colors"
-                  >
-                    🎓 Ahmed (L3 CS Student)
-                  </button>
-                  <button
-                    onClick={() => { switchUser('usr_student_2'); navigate('student-dashboard'); }}
-                    className="px-3 py-1.5 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 text-xs font-mono font-bold shadow-[2px_2px_0px_#000000] hover:bg-[#FFE600] dark:hover:bg-[#FFE600] dark:hover:text-black transition-colors"
-                  >
-                    ☀️ Sarah (Summer - Max 3)
-                  </button>
-                  <button
-                    onClick={() => { switchUser('usr_admin_l3'); navigate('admin-dashboard'); }}
-                    className="px-3 py-1.5 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 text-xs font-mono font-bold shadow-[2px_2px_0px_#000000] hover:bg-blue-400 hover:text-black transition-colors"
-                  >
-                    🛡️ Dr. Vance (Level 3 Admin)
-                  </button>
-                  <button
-                    onClick={() => { switchUser('usr_super_admin'); navigate('admin-dashboard'); }}
-                    className="px-3 py-1.5 bg-white dark:bg-neutral-800 border-2 border-black dark:border-neutral-700 text-xs font-mono font-bold shadow-[2px_2px_0px_#000000] hover:bg-purple-400 hover:text-black transition-colors"
-                  >
-                    👑 Dean Arthur (Super Admin)
-                  </button>
-                </div>
               </div>
             </div>
 

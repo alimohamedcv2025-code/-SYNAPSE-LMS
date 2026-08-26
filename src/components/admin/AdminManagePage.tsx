@@ -1,58 +1,46 @@
 import React, { useState } from 'react';
 import { useApp } from '../../context/AppContext';
-import { AdminScope, User } from '../../types';
-import { 
-  ShieldCheck, 
-  UserPlus, 
-  Trash2, 
-  Lock, 
-  CheckCircle2, 
-  AlertTriangle,
+import { AdminScope, UserRole } from '../../types';
+import {
+  ShieldCheck,
+  UserPlus,
+  Trash2,
+  Lock,
   Mail,
-  Shield
+  Shield,
+  Users,
+  Ban,
+  CheckCircle2
 } from 'lucide-react';
 
+const SCOPE_OPTIONS: { value: AdminScope; label: string }[] = [
+  { value: 'level_2', label: 'Level 2 General Scope' },
+  { value: 'level_3', label: 'Level 3 General Track' },
+  { value: 'level_4', label: 'Level 4 Senior Scope' },
+  { value: 'summer', label: 'Summer Term Scope' },
+  { value: 'case', label: 'Case Study Scope' },
+  { value: 'all', label: 'All Levels (Unrestricted)' }
+];
+
 export const AdminManagePage: React.FC = () => {
-  const { users, setUsers, currentUser, showToast } = useApp();
+  const {
+    users, currentUser, showToast,
+    createAdminUser, updateUserRole, updateAdminScope,
+    toggleUserActive, deleteUserAccount
+  } = useApp();
 
   const isSuperAdmin = currentUser?.role === 'super_admin';
 
   const [isCreating, setIsCreating] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [scope, setScope] = useState<AdminScope>('level_3');
+  const [newAdminScope, setNewAdminScope] = useState<AdminScope>('level_3');
 
-  const adminUsers = users.filter(u => u.role === 'admin' || u.role === 'super_admin');
-
-  const handleCreateAdmin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name || !email) return;
-
-    const newAdmin: User = {
-      id: `usr_adm_${Date.now()}`,
-      name,
-      email,
-      role: 'admin',
-      adminScope: scope,
-      isActive: true,
-      createdAt: new Date().toISOString()
-    };
-
-    setUsers(prev => [...prev, newAdmin]);
-    showToast(`Created new Scoped Admin for ${scope.toUpperCase()}.`, 'success');
-    setName('');
-    setEmail('');
-    setIsCreating(false);
-  };
-
-  const handleDeleteAdmin = (id: string) => {
-    if (id === currentUser?.id) {
-      showToast('Cannot remove your own active admin account.', 'error');
-      return;
-    }
-    setUsers(prev => prev.filter(u => u.id !== id));
-    showToast('Admin account removed.', 'info');
-  };
+  // Role editing state per row
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editRole, setEditRole] = useState<UserRole>('student');
+  const [editScope, setEditScope] = useState<AdminScope>('level_3');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isSuperAdmin) {
     return (
@@ -66,9 +54,32 @@ export const AdminManagePage: React.FC = () => {
     );
   }
 
+  const startEditing = (userId: string, role: UserRole, scope?: AdminScope) => {
+    setEditingId(userId);
+    setEditRole(role);
+    setEditScope(scope || 'level_3');
+  };
+
+  const saveRole = async (userId: string) => {
+    if (editRole !== 'student' && editRole !== 'super_admin' && !editScope) return;
+    const success = await updateUserRole(userId, editRole, editRole === 'admin' ? editScope : undefined);
+    if (success) setEditingId(null);
+  };
+
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name || !email) return;
+    setIsSubmitting(true);
+    await createAdminUser(name, email.trim(), newAdminScope);
+    setIsSubmitting(false);
+    setName('');
+    setEmail('');
+    setIsCreating(false);
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-black dark:border-neutral-700 pb-6">
         <div className="space-y-1">
@@ -77,10 +88,10 @@ export const AdminManagePage: React.FC = () => {
             <span>GLOBAL GOVERNANCE & SCOPES</span>
           </div>
           <h1 className="font-display font-black text-3xl sm:text-4xl text-neutral-900 dark:text-white uppercase tracking-tight">
-            Manage Department Administrators
+            Account & Role Management
           </h1>
           <p className="text-sm font-mono text-neutral-600 dark:text-neutral-400">
-            Provision departmental faculty accounts and assign strict RBAC scopes (Level 2, Level 3 CS/AI/IS, Summer, Case).
+            View every registered account and assign roles (Student / Scoped Admin / Super Admin) with strict RBAC scopes.
           </p>
         </div>
 
@@ -99,6 +110,9 @@ export const AdminManagePage: React.FC = () => {
           <h3 className="font-display font-black text-lg uppercase text-neutral-900 dark:text-white">
             Provision Scoped Administrator
           </h3>
+          <p className="text-[11px] text-neutral-500">
+            The account will be created with a temporary password: <span className="font-bold text-black dark:text-[#FFE600]">ChangeMe123!</span> — share it securely.
+          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
@@ -128,18 +142,13 @@ export const AdminManagePage: React.FC = () => {
             <div>
               <label className="block font-bold mb-1 uppercase">Assigned RBAC Scope *</label>
               <select
-                value={scope}
-                onChange={(e) => setScope(e.target.value as AdminScope)}
+                value={newAdminScope}
+                onChange={(e) => setNewAdminScope(e.target.value as AdminScope)}
                 className="neo-input dark:bg-neutral-900 dark:text-white font-bold"
               >
-                <option value="level_2">Level 2 General Scope</option>
-                <option value="level_3">Level 3 General Track</option>
-                <option value="level_3_cs">Level 3 • CS Department</option>
-                <option value="level_3_ai">Level 3 • AI Department</option>
-                <option value="level_3_is">Level 3 • IS Department</option>
-                <option value="level_4">Level 4 Senior Scope</option>
-                <option value="summer">Summer Term Scope</option>
-                <option value="case">Case Study Scope</option>
+                {SCOPE_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -154,84 +163,187 @@ export const AdminManagePage: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="neo-btn neo-btn-primary px-6 py-2 font-black"
+              disabled={isSubmitting}
+              className="neo-btn neo-btn-primary px-6 py-2 font-black disabled:opacity-50"
             >
-              Confirm & Issue Access
+              {isSubmitting ? 'Creating...' : 'Confirm & Issue Access'}
             </button>
           </div>
         </form>
       )}
 
-      {/* Admin Users Table */}
-      <div className="border-2 border-black dark:border-neutral-700 bg-white dark:bg-[#1a1a1e] shadow-[6px_6px_0px_#000000] overflow-x-auto">
-        <table className="w-full text-left font-mono text-xs border-collapse">
-          <thead>
-            <tr className="bg-black text-white uppercase text-[11px] border-b-2 border-black">
-              <th className="p-3.5">Administrator</th>
-              <th className="p-3.5">Assigned Scope Domain</th>
-              <th className="p-3.5">Security Level</th>
-              <th className="p-3.5 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y-2 divide-neutral-200 dark:divide-neutral-800">
-            {adminUsers.map(adm => {
-              const isSuper = adm.role === 'super_admin';
+      {/* All Registered Accounts */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 font-mono text-sm font-black uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
+          <Users className="w-4 h-4" />
+          <span>All Registered Accounts ({users.length})</span>
+        </div>
 
-              return (
-                <tr key={adm.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/60 transition-colors">
-                  
-                  {/* Name & Email */}
-                  <td className="p-3.5 space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-display font-bold text-sm text-neutral-900 dark:text-white">
-                        {adm.name}
-                      </span>
-                      {adm.id === currentUser?.id && (
-                        <span className="px-1.5 py-0.2 bg-[#FFE600] text-black text-[9px] font-bold border border-black">
-                          YOU
+        <div className="border-2 border-black dark:border-neutral-700 bg-white dark:bg-[#1a1a1e] shadow-[6px_6px_0px_#000000] overflow-x-auto">
+          <table className="w-full text-left font-mono text-xs border-collapse">
+            <thead>
+              <tr className="bg-black text-white uppercase text-[11px] border-b-2 border-black">
+                <th className="p-3.5">Account</th>
+                <th className="p-3.5">Role</th>
+                <th className="p-3.5">Scope</th>
+                <th className="p-3.5">Status</th>
+                <th className="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y-2 divide-neutral-200 dark:divide-neutral-800">
+              {users.map(u => {
+                const isSelf = u.id === currentUser?.id;
+                const isSuper = u.role === 'super_admin';
+                const isEditing = editingId === u.id;
+
+                return (
+                  <tr key={u.id} className={`hover:bg-neutral-50 dark:hover:bg-neutral-800/60 transition-colors ${!u.isActive ? 'opacity-50' : ''}`}>
+
+                    {/* Name & Email */}
+                    <td className="p-3.5 space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="font-display font-bold text-sm text-neutral-900 dark:text-white">
+                          {u.name || '(No name)'}
+                        </span>
+                        {isSelf && (
+                          <span className="px-1.5 bg-[#FFE600] text-black text-[9px] font-bold border border-black">
+                            YOU
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-neutral-500 flex items-center gap-1">
+                        <Mail className="w-3 h-3" /> {u.email}
+                      </p>
+                    </td>
+
+                    {/* Role */}
+                    <td className="p-3.5">
+                      {isEditing ? (
+                        <select
+                          value={editRole}
+                          onChange={(e) => setEditRole(e.target.value as UserRole)}
+                          className="neo-input dark:bg-neutral-900 dark:text-white py-1 text-[11px] w-full min-w-[130px]"
+                        >
+                          <option value="student">🎓 Student</option>
+                          <option value="admin">🛡️ Level Admin</option>
+                          <option value="super_admin">👑 Super Admin</option>
+                        </select>
+                      ) : (
+                        <span className={`px-2.5 py-1 text-[11px] font-bold uppercase border-2 shadow-[1.5px_1.5px_0px_#000000] ${
+                          isSuper
+                            ? 'bg-purple-200 text-purple-950 border-purple-900'
+                            : u.role === 'admin'
+                              ? 'bg-blue-200 text-blue-950 border-blue-900'
+                              : 'bg-emerald-100 text-emerald-950 border-emerald-900'
+                        }`}>
+                          {isSuper ? '👑 SUPER ADMIN' : u.role === 'admin' ? '🛡️ ADMIN' : '🎓 STUDENT'}
                         </span>
                       )}
-                    </div>
-                    <p className="text-[11px] text-neutral-500 font-mono">
-                      {adm.email} • ID: {adm.id}
-                    </p>
-                  </td>
+                    </td>
 
-                  {/* Scope */}
-                  <td className="p-3.5">
-                    <span className={`px-2.5 py-1 text-[11px] font-bold uppercase border-2 shadow-[1.5px_1.5px_0px_#000000] ${
-                      isSuper
-                        ? 'bg-purple-200 text-purple-950 border-purple-900'
-                        : 'bg-[#FFE600] text-black border-black'
-                    }`}>
-                      {isSuper ? '👑 GLOBAL UNRESTRICTED' : `🛡️ ${adm.adminScope?.toUpperCase()}`}
-                    </span>
-                  </td>
+                    {/* Scope */}
+                    <td className="p-3.5">
+                      {isEditing ? (
+                        <select
+                          value={editScope}
+                          onChange={(e) => setEditScope(e.target.value as AdminScope)}
+                          disabled={editRole !== 'admin'}
+                          className="neo-input dark:bg-neutral-900 dark:text-white py-1 text-[11px] w-full min-w-[140px] disabled:opacity-40"
+                        >
+                          {SCOPE_OPTIONS.map(opt => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        u.role === 'admin'
+                          ? (
+                            <button
+                              onClick={() => startEditing(u.id, u.role, u.adminScope)}
+                              className="hover:underline decoration-dotted"
+                              title="Click to change scope"
+                            >
+                              🛡️ {u.adminScope?.toUpperCase() || '—'}
+                            </button>
+                          )
+                          : isSuper ? '🌍 ALL' : <span className="text-neutral-400">—</span>
+                      )}
+                    </td>
 
-                  {/* Role */}
-                  <td className="p-3.5 text-neutral-700 dark:text-neutral-300 font-bold uppercase">
-                    {adm.role.replace('_', ' ')}
-                  </td>
+                    {/* Status */}
+                    <td className="p-3.5">
+                      {!isSelf && (
+                        <button
+                          onClick={() => toggleUserActive(u.id)}
+                          className={`px-2 py-0.5 text-[10px] font-bold uppercase border-2 shadow-[1.5px_1.5px_0px_#000000] cursor-pointer transition-colors ${
+                            u.isActive
+                              ? 'bg-emerald-400 text-black border-black hover:bg-emerald-300'
+                              : 'bg-red-400 text-white border-black hover:bg-red-300'
+                          }`}
+                          title={u.isActive ? 'Click to deactivate' : 'Click to reactivate'}
+                        >
+                          {u.isActive ? '✓ Active' : '✕ Frozen'}
+                        </button>
+                      )}
+                      {isSelf && <span className="text-[10px] font-bold uppercase text-neutral-400">—</span>}
+                    </td>
 
-                  {/* Actions */}
-                  <td className="p-3.5 text-right">
-                    {!isSuper && (
-                      <button
-                        onClick={() => handleDeleteAdmin(adm.id)}
-                        className="p-1.5 bg-white dark:bg-neutral-700 border border-black hover:bg-red-500 hover:text-white text-red-600 transition-colors inline-flex items-center gap-1"
-                        title="Revoke Admin Access"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Revoke</span>
-                      </button>
-                    )}
-                  </td>
+                    {/* Actions */}
+                    <td className="p-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {isEditing ? (
+                          <>
+                            <button
+                              onClick={() => saveRole(u.id)}
+                              disabled={isSubmitting}
+                              className="p-1.5 bg-emerald-400 border border-black hover:bg-emerald-300 text-black font-bold inline-flex items-center gap-1 disabled:opacity-50"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Save</span>
+                            </button>
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="p-1.5 bg-white dark:bg-neutral-700 border border-black font-bold"
+                            >
+                              ✕
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => startEditing(u.id, u.role, u.adminScope)}
+                              disabled={isSelf}
+                              className="p-1.5 bg-white dark:bg-neutral-700 border border-black hover:bg-[#FFE600] hover:text-black inline-flex items-center gap-1 font-bold disabled:opacity-40 disabled:hover:bg-white dark:disabled:hover:bg-neutral-700"
+                              title="Change role / scope"
+                            >
+                              <Shield className="w-3.5 h-3.5" />
+                              <span>Role</span>
+                            </button>
+                            {!isSelf && !isSuper && (
+                              <button
+                                onClick={() => deleteUserAccount(u.id)}
+                                className="p-1.5 bg-white dark:bg-neutral-700 border border-black hover:bg-red-500 hover:text-white text-red-600 transition-colors inline-flex items-center gap-1"
+                                title="Delete account permanently"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>Delete</span>
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </td>
 
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="text-[11px] font-mono text-neutral-500 flex items-center gap-1.5">
+          <Ban className="w-3 h-3" />
+          Frozen accounts cannot sign in. Deleting removes the profile immediately — full auth cleanup runs server-side.
+        </p>
       </div>
 
     </div>

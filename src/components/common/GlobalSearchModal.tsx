@@ -3,37 +3,42 @@ import { useApp } from '../../context/AppContext';
 import { Search, X, BookOpen, ExternalLink, HelpCircle, ArrowRight } from 'lucide-react';
 
 export const GlobalSearchModal: React.FC = () => {
-  const { 
-    isSearchOpen, 
-    setIsSearchOpen, 
-    subjects, 
-    materials, 
-    questions, 
-    navigate 
+  const {
+    isSearchOpen,
+    setIsSearchOpen,
+    materials,
+    questions,
+    navigate,
+    getCatalogSubjectsForStudent
   } = useApp();
 
   const [query, setQuery] = useState('');
 
+  const visibleSubjects = useMemo(() => getCatalogSubjectsForStudent(), [getCatalogSubjectsForStudent]);
+
   const filteredSubjects = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
-    return subjects.filter(s => 
-      s.name.toLowerCase().includes(q) || 
+    return visibleSubjects.filter(s =>
+      s.name.toLowerCase().includes(q) ||
       s.code.toLowerCase().includes(q) ||
       s.description.toLowerCase().includes(q) ||
       s.tags.some(t => t.toLowerCase().includes(q))
     ).slice(0, 4);
-  }, [subjects, query]);
+  }, [visibleSubjects, query]);
+
+  const visibleSubjectIds = useMemo(() => new Set(visibleSubjects.map(s => s.id)), [visibleSubjects]);
 
   const filteredMaterials = useMemo(() => {
     if (!query.trim()) return [];
     const q = query.toLowerCase();
-    return materials.filter(m => 
-      m.title.toLowerCase().includes(q) || 
-      m.description.toLowerCase().includes(q) ||
-      m.subjectName.toLowerCase().includes(q)
+    return materials.filter(m =>
+      (m.title.toLowerCase().includes(q) ||
+       m.description.toLowerCase().includes(q) ||
+       m.subjectName.toLowerCase().includes(q)) &&
+      visibleSubjectIds.has(m.subjectId)
     ).slice(0, 5);
-  }, [materials, query]);
+  }, [materials, query, visibleSubjectIds]);
 
   const filteredQuestions = useMemo(() => {
     if (!query.trim()) return [];

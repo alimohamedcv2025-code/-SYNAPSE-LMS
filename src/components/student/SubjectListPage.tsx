@@ -4,18 +4,27 @@ import { AcademicLevel, Department, Semester } from '../../types';
 import { BookOpen, Search, Filter, Layers, ArrowRight, Sparkles } from 'lucide-react';
 
 export const SubjectListPage: React.FC = () => {
-  const { subjects, materials, navigate, currentUser } = useApp();
+  const { subjects, materials, navigate, currentUser, getCatalogSubjectsForStudent } = useApp();
 
   const [search, setSearch] = useState('');
   const [levelFilter, setLevelFilter] = useState<string>('all');
   const [departmentFilter, setDepartmentFilter] = useState<string>('all');
 
+  // Students on fixed tracks (L2/L3) only ever see their own track's subjects
+  const isConstrainedStudent = currentUser?.role === 'student' &&
+    (currentUser.academicProfile?.level === 'level_2' || currentUser.academicProfile?.level === 'level_3');
+
+  const baseSubjects = useMemo(
+    () => (isConstrainedStudent ? getCatalogSubjectsForStudent() : subjects),
+    [subjects, currentUser, isConstrainedStudent]
+  );
+
   const filteredSubjects = useMemo(() => {
-    return subjects.filter(sub => {
+    return baseSubjects.filter(sub => {
       // Search
       if (search.trim()) {
         const q = search.toLowerCase();
-        const matchesQuery = 
+        const matchesQuery =
           sub.name.toLowerCase().includes(q) ||
           sub.code.toLowerCase().includes(q) ||
           sub.description.toLowerCase().includes(q) ||
@@ -23,19 +32,21 @@ export const SubjectListPage: React.FC = () => {
         if (!matchesQuery) return false;
       }
 
-      // Level
-      if (levelFilter !== 'all' && sub.primaryLevel !== levelFilter) {
-        return false;
-      }
+      if (!isConstrainedStudent) {
+        // Level
+        if (levelFilter !== 'all' && sub.primaryLevel !== levelFilter) {
+          return false;
+        }
 
-      // Department
-      if (departmentFilter !== 'all' && sub.department !== departmentFilter) {
-        return false;
+        // Department
+        if (departmentFilter !== 'all' && sub.department !== departmentFilter) {
+          return false;
+        }
       }
 
       return true;
     });
-  }, [subjects, search, levelFilter, departmentFilter]);
+  }, [baseSubjects, search, levelFilter, departmentFilter, isConstrainedStudent]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
@@ -47,10 +58,12 @@ export const SubjectListPage: React.FC = () => {
           <span>COURSE CATALOG & CURRICULUM</span>
         </div>
         <h1 className="font-display font-black text-3xl sm:text-4xl text-neutral-900 dark:text-white uppercase tracking-tight">
-          College Subjects Catalog
+          {isConstrainedStudent ? 'My Track Subjects' : 'College Subjects Catalog'}
         </h1>
         <p className="text-sm font-mono text-neutral-600 dark:text-neutral-400">
-          Browse comprehensive university subjects across Level 2, Level 3 tracks (AI, CS, IS), Summer, and Case programs.
+          {isConstrainedStudent
+            ? `Showing only the subjects available to your track: ${(currentUser?.academicProfile?.level || '').toUpperCase()}${currentUser?.academicProfile?.department ? ` • ${currentUser.academicProfile.department}` : ''} • Semester ${currentUser?.academicProfile?.semester}`
+            : 'Browse comprehensive university subjects across Level 2, Level 3 tracks (AI, CS, IS), Summer, and Case programs.'}
         </p>
       </div>
 
@@ -69,34 +82,38 @@ export const SubjectListPage: React.FC = () => {
           />
         </div>
 
-        {/* Level Filter */}
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-neutral-500 uppercase">Level:</span>
-          <select
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-            className="px-3 py-2 border-2 border-black dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white font-bold outline-none"
-          >
-            <option value="all">All Levels</option>
-            <option value="level_2">Level 2</option>
-            <option value="level_3">Level 3</option>
-          </select>
-        </div>
+        {/* Level Filter (hidden for track-locked students) */}
+        {!isConstrainedStudent && (
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-neutral-500 uppercase">Level:</span>
+            <select
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value)}
+              className="px-3 py-2 border-2 border-black dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white font-bold outline-none"
+            >
+              <option value="all">All Levels</option>
+              <option value="level_2">Level 2</option>
+              <option value="level_3">Level 3</option>
+            </select>
+          </div>
+        )}
 
-        {/* Department Filter */}
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-neutral-500 uppercase">Dept:</span>
-          <select
-            value={departmentFilter}
-            onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="px-3 py-2 border-2 border-black dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white font-bold outline-none"
-          >
-            <option value="all">All Depts</option>
-            <option value="CS">CS (Computer Science)</option>
-            <option value="AI">AI (Artificial Intelligence)</option>
-            <option value="IS">IS (Information Systems)</option>
-          </select>
-        </div>
+        {/* Department Filter (hidden for track-locked students) */}
+        {!isConstrainedStudent && (
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-neutral-500 uppercase">Dept:</span>
+            <select
+              value={departmentFilter}
+              onChange={(e) => setDepartmentFilter(e.target.value)}
+              className="px-3 py-2 border-2 border-black dark:border-neutral-700 bg-white dark:bg-neutral-800 dark:text-white font-bold outline-none"
+            >
+              <option value="all">All Depts</option>
+              <option value="CS">CS (Computer Science)</option>
+              <option value="AI">AI (Artificial Intelligence)</option>
+              <option value="IS">IS (Information Systems)</option>
+            </select>
+          </div>
+        )}
 
         {/* Results Counter */}
         <span className="bg-[#FFE600] text-black px-2.5 py-1 font-bold border border-black">

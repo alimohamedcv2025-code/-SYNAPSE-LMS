@@ -1,6 +1,5 @@
 import React from 'react';
 import { AppProvider, useApp } from './context/AppContext';
-import { RoleSwitcherBanner } from './components/common/RoleSwitcherBanner';
 import { Navbar } from './components/common/Navbar';
 import { GlobalSearchModal } from './components/common/GlobalSearchModal';
 import { NotificationsModal } from './components/common/NotificationsModal';
@@ -23,9 +22,22 @@ import { AdminSubjectsPage } from './components/admin/AdminSubjectsPage';
 import { AdminManagePage } from './components/admin/AdminManagePage';
 
 const AppContent: React.FC = () => {
-  const { activePage, darkMode } = useApp();
+  const { activePage, darkMode, currentUser, isLoading } = useApp();
 
   const renderCurrentPage = () => {
+    if (isLoading) {
+      return (
+        <div className="min-h-[60vh] flex items-center justify-center font-mono text-sm text-neutral-500">
+          LOADING PLATFORM...
+        </div>
+      );
+    }
+    // Auth guard: any page other than public ones requires a session
+    const isPublic = activePage === 'landing' || activePage === 'login' || activePage === 'register';
+    if (!currentUser && !isPublic) {
+      return <LandingPage />;
+    }
+
     switch (activePage) {
       case 'landing':
         return <LandingPage />;
@@ -59,24 +71,23 @@ const AppContent: React.FC = () => {
       case 'admin-admins':
         return <AdminManagePage />;
       default:
-        return <StudentDashboard />;
+        return currentUser?.role === 'student'
+          ? <StudentDashboard />
+          : <AdminDashboard />;
     }
   };
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''} bg-[#FAF9F5] dark:bg-[#121316] text-neutral-900 dark:text-white flex flex-col font-sans transition-colors duration-150 selection:bg-[#FFE600] selection:text-black`}>
-      {/* 1. Testing Role Switcher Banner */}
-      <RoleSwitcherBanner />
-
-      {/* 2. Primary Navigation Header */}
+      {/* 1. Primary Navigation Header */}
       <Navbar />
 
-      {/* 3. Main Routed View */}
+      {/* 2. Main Routed View */}
       <main className="flex-1">
         {renderCurrentPage()}
       </main>
 
-      {/* 4. Global Modals & Notifications */}
+      {/* 3. Global Modals & Notifications */}
       <GlobalSearchModal />
       <NotificationsModal />
       <ToastContainer />
