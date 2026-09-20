@@ -93,18 +93,7 @@ export const RegisterPage: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block font-bold mb-1 text-neutral-800 dark:text-neutral-200">
-                  PHONE NUMBER
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+1 (555) 000-0000"
-                  className="neo-input dark:bg-neutral-800 dark:text-white dark:border-neutral-700"
-                />
-              </div>
+          
 
               <div>
                 <label className="block font-bold mb-1 text-neutral-800 dark:text-neutral-200">
