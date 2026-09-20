@@ -1,0 +1,4 @@
+user:ali.mohamed.cv2025@gmail.com
+pass:Syn@pse2026!Adm#Secure
+
+url:https://synapse-lms-inky.vercel.app/

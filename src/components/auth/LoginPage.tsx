@@ -18,7 +18,7 @@ export const LoginPage: React.FC = () => {
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 py-12 bg-dot-pattern">
       <div className="w-full max-w-md bg-white dark:bg-[#1a1a1e] border-2 border-black dark:border-neutral-700 p-8 shadow-[8px_8px_0px_#000000]">
-        
+
         {/* Header */}
         <div className="text-center space-y-2 mb-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#FFE600] border-2 border-black font-mono font-bold text-xs shadow-[2px_2px_0px_#000000] text-black">
@@ -37,7 +37,7 @@ export const LoginPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-4 font-mono text-xs">
           <div>
             <label className="block font-bold text-neutral-800 dark:text-neutral-200 uppercase mb-1">
-              Institutional Email
+              Email
             </label>
             <div className="relative">
               <input

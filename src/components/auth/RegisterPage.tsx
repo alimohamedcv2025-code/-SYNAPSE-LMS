@@ -81,7 +81,7 @@ export const RegisterPage: React.FC = () => {
 
               <div>
                 <label className="block font-bold mb-1 text-neutral-800 dark:text-neutral-200">
-                  INSTITUTIONAL EMAIL *
+                  EMAIL *
                 </label>
                 <input
                   type="email"
